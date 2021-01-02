@@ -12,6 +12,8 @@ defmodule BraveWeb.Router do
     post "/user", UserController, :create
   end
 
+  # coveralls-ignore-start
+
   # Enables LiveDashboard only for development
   #
   # If you want to use the LiveDashboard in production, you should put
@@ -27,4 +29,6 @@ defmodule BraveWeb.Router do
       live_dashboard "/dashboard", metrics: BraveWeb.Telemetry
     end
   end
+
+  #coveralls-ignore-stop
 end

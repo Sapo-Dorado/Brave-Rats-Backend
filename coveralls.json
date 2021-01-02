@@ -1,0 +1,13 @@
+{
+    "skip_files": [
+        "test",
+        "lib/brave.ex",
+        "lib/brave/application.ex",
+        "lib/brave/repo.ex",
+        "lib/brave_web.ex",
+        "lib/brave_web/channels/user_socket.ex",
+        "lib/brave_web/endpoint.ex",
+        "lib/brave_web/gettext.ex",
+        "lib/brave_web/views/error_helpers.ex"
+    ]
+}

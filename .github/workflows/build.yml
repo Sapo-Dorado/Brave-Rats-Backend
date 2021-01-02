@@ -41,7 +41,7 @@ jobs:
       - run: mix ecto.migrate
       - run: npm install
         working-directory: ./assets
-      - run: mix test --trace
+      - run: MIX_ENV=test mix coveralls.json --trace
       - name: Upload to Codecov
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
