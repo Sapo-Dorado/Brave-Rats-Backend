@@ -42,3 +42,7 @@ jobs:
       - run: npm install
         working-directory: ./assets
       - run: mix test --trace
+      - name: Upload to Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash)
