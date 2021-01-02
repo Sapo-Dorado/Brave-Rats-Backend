@@ -7,6 +7,9 @@ defmodule BraveWeb.Router do
 
   scope "/api", BraveWeb do
     pipe_through :api
+
+    get "/user", UserController, :show
+    post "/user", UserController, :create
   end
 
   # Enables LiveDashboard only for development
