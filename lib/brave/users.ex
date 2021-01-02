@@ -26,7 +26,7 @@ defmodule Brave.Users do
 
   def create_user(%{"username" => username, "password" => password}) do
     %User{}
-    |> User.changeset(%{username: username, password_hash: Argon2.hash_pwd_salt(password), uuid: Ecto.UUID.generate})
+    |> User.changeset(%{username: username, password_hash: password, uuid: Ecto.UUID.generate})
     |> Repo.insert()
   end
 
@@ -34,7 +34,7 @@ defmodule Brave.Users do
     user_errors(params)
   end
 
-  def user_errors(params) do
+  defp user_errors(params) do
     errors = Enum.reduce(["username", "password"], %{}, fn(field, acc) ->
       if(params[field] == nil) do
         Map.put(acc, field, ["required field"])
