@@ -39,6 +39,11 @@ defmodule Brave.Users.UsersTest do
       assert {:error, %Ecto.Changeset{}} = Users.create_user(%{"username" => @invalid_attrs.username, "password" => @invalid_attrs.password})
     end
 
+    test "create_user/1 returns an error changeset when username is already taken" do
+      Users.create_user(%{"username" => @valid_attrs.username, "password" => @valid_attrs.password})
+      assert {:error, %Ecto.Changeset{}} = Users.create_user(%{"username" => @valid_attrs.username, "password" => @valid_attrs.password})
+    end
+
     test "create_user/1 with invalid parameters returns errors" do
       assert %{errors: %{"password" => ["required field"]}} = Users.create_user(%{"username" => @valid_attrs.username})
       assert %{errors: %{"username" => ["required field"]}} = Users.create_user(%{"password" => @valid_attrs.password})
