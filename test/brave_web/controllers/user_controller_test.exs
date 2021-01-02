@@ -4,11 +4,11 @@ defmodule BraveWeb.UserControllerTest do
   alias Brave.Users
 
   @create_attrs %{
-    password: "some password",
     username: "some username",
+    password: "some password"
   }
 
-  @invalid_attrs %{password: nil, username: nil}
+  @invalid_attrs %{username: nil, password: nil}
 
   def fixture(:user) do
     {:ok, user} = Users.create_user(%{"username" => @create_attrs.username, "password" => @create_attrs.password})
