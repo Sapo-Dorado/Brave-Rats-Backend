@@ -25,6 +25,8 @@ defmodule BraveWeb.FallbackController do
     case errors do
       %{"password" => ["invalid password"]} ->
         put_status(conn, :unauthorized)
+      %{"user" => ["unauthorized uuid"]} ->
+        put_status(conn, :unauthorized)
       _ ->
         put_status(conn, :bad_request)
     end

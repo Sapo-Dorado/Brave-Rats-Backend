@@ -19,6 +19,8 @@ defmodule Brave.Repo.Migrations.CreateGames do
       add :on_hold, {:array, {:array, :integer}}
       add :p1_general?, :boolean, default: false, null: false
       add :p2_general?, :boolean, default: false, null: false
+      add :p1_spy?, :boolean, default: false, null: false
+      add :p2_spy?, :boolean, default: false, null: false
       add :completed?, :boolean, default: false, null: false
 
       timestamps()

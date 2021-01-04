@@ -118,14 +118,17 @@ defmodule BraveWeb.GameControllerTest do
   describe "update game" do
     setup [:create_game]
 
-    test "placeholder test", %{conn: conn, game: %Game{game_id: id, p1_uuid: user, p2_name: opponent} = _game} do
+    test "updating game returns updated game when input is valid", %{conn: conn, game: %Game{game_id: id, p1_uuid: user, p2_name: opponent} = _game} do
       conn = patch(conn, Routes.game_path(conn, :update, id: id, user: user, opponent: opponent, card: 1))
-      assert %{"good job" => ["not implemented yet"]} = json_response(conn, 400)["errors"]
+      assert %{"p1_card" => 1, "p1_cards" => [0,2,3,4,5,6,7]} = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when input is invalid", %{conn: conn} do
+    test "renders errors when input is invalid", %{conn: conn, game: %Game{game_id: id}} do
       conn = patch(conn, Routes.game_path(conn, :update))
       assert json_response(conn, 400)["errors"] != %{}
+
+      conn = patch(conn, Routes.game_path(conn, :update, id: id, user: "invalid uuid", card: 1))
+      assert json_response(conn, 401)["errors"] != %{}
     end
   end
 
