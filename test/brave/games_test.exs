@@ -2,95 +2,117 @@ defmodule Brave.GamesTest do
   use Brave.DataCase
 
   alias Brave.Games
+  alias Brave.Users
 
   describe "games" do
     alias Brave.Games.Game
 
-    @valid_attrs %{completed: true, game_id: "some game_id", on_hold: [], p1_card: 42, p1_cards: [], p1_general?: true, p1_name: "some p1_name", p1_points: 42, p1_uuid: "some p1_uuid", p1_winnings: [], p2_card: 42, p2_cards: [], p2_general?: true, p2_name: "some p2_name", p2_points: 42, p2_uuid: "some p2_uuid", p2_winnings: []}
-    @update_attrs %{completed: false, game_id: "some updated game_id", on_hold: [], p1_card: 43, p1_cards: [], p1_general?: false, p1_name: "some updated p1_name", p1_points: 43, p1_uuid: "some updated p1_uuid", p1_winnings: [], p2_card: 43, p2_cards: [], p2_general?: false, p2_name: "some updated p2_name", p2_points: 43, p2_uuid: "some updated p2_uuid", p2_winnings: []}
-    @invalid_attrs %{completed: nil, game_id: nil, on_hold: nil, p1_card: nil, p1_cards: nil, p1_general?: nil, p1_name: nil, p1_points: nil, p1_uuid: nil, p1_winnings: nil, p2_card: nil, p2_cards: nil, p2_general?: nil, p2_name: nil, p2_points: nil, p2_uuid: nil, p2_winnings: nil}
+    def fixture(:p1) do
+      {:ok, user} = Users.create_user(%{"username" => "p1", "password" => "password"})
+      user
+    end
 
-    def game_fixture(attrs \\ %{}) do
+    def fixture(:p2) do
+      {:ok, user} = Users.create_user(%{"username" => "p2", "password" => "password"})
+      user
+    end
+
+    def fixture(:p3) do
+      {:ok, user} = Users.create_user(%{"username" => "p3", "password" => "password"})
+      user
+    end
+
+    def game_fixture(p1, p2, attrs \\ %{}) do
       {:ok, game} =
         attrs
-        |> Enum.into(@valid_attrs)
+        |> Enum.into(%{p1_uuid: p1.uuid, p2_uuid: p2.uuid, p1_name: p1.username, p2_name: p2.username})
         |> Games.create_game()
 
       game
     end
 
-    test "list_games/0 returns all games" do
-      game = game_fixture()
-      assert Games.list_games() == [game]
+    test "list_games/1 and list_completed_games/1 return all games in progress and completed respectively" do
+      p1 = fixture(:p1)
+      p2 = fixture(:p2)
+      p3 = fixture(:p3)
+
+      game = game_fixture(p1,p2)
+      game2 = game_fixture(p1, p2, %{completed?: true})
+
+      game3 = game_fixture(p3, p2)
+      game4 = game_fixture(p1, p3, %{completed?: true})
+
+      assert Games.list_games(%{"user" => p1.uuid}) == {:ok, [game]}
+      assert Games.list_games(%{"user" => p2.uuid}) == {:ok, [game, game3]}
+      assert Games.list_games(%{"user" => p2.uuid, "opponent" => p3.username}) == {:ok, [game3]}
+      assert Games.list_games(%{"user" => p1.uuid, "opponent" => p3.username}) == {:ok, []}
+
+      assert Games.list_completed_games(%{"user" => p1.uuid}) == {:ok, [game2, game4]}
+      assert Games.list_completed_games(%{"user" => p3.uuid, "opponent" => p1.username}) == {:ok, [game4]}
+      assert Games.list_completed_games(%{"user" => p2.uuid, "opponent" => p3.username}) == {:ok, []}
     end
 
-    test "get_game!/1 returns the game with given id" do
-      game = game_fixture()
-      assert Games.get_game!(game.id) == game
+    test "list_games/1 and list_completed_games/1 return errors with invalid inputs" do
+      assert %{errors: %{"user" => ["required field"]}} = Games.list_games(%{})
+      assert %{errors: %{"user" => ["required field"]}} = Games.list_completed_games(%{})
     end
+
 
     test "create_game/1 with valid data creates a game" do
-      assert {:ok, %Game{} = game} = Games.create_game(@valid_attrs)
-      assert game.completed == true
-      assert game.game_id == "some game_id"
+      p1 = fixture(:p1)
+      p2 = fixture(:p2)
+      game_params = %{p1_uuid: p1.uuid, p2_uuid: p2.uuid, p1_name: p1.username, p2_name: p2.username}
+      assert {:ok, %Game{} = game} = Games.create_game(game_params)
+      assert game.completed? == false
       assert game.on_hold == []
-      assert game.p1_card == 42
-      assert game.p1_cards == []
-      assert game.p1_general? == true
-      assert game.p1_name == "some p1_name"
-      assert game.p1_points == 42
-      assert game.p1_uuid == "some p1_uuid"
+      assert game.p1_card == nil
+      assert game.p1_cards == [0,1,2,3,4,5,6,7]
+      assert game.p1_general? == false
+      assert game.p1_name == p1.username
+      assert game.p1_points == 0
+      assert game.p1_uuid == p1.uuid
       assert game.p1_winnings == []
-      assert game.p2_card == 42
-      assert game.p2_cards == []
-      assert game.p2_general? == true
-      assert game.p2_name == "some p2_name"
-      assert game.p2_points == 42
-      assert game.p2_uuid == "some p2_uuid"
+      assert game.p2_card == nil
+      assert game.p2_cards == [0,1,2,3,4,5,6,7]
+      assert game.p2_general? == false
+      assert game.p2_name == p2.username
+      assert game.p2_points == 0
+      assert game.p2_uuid == p2.uuid
       assert game.p2_winnings == []
     end
 
     test "create_game/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Games.create_game(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Games.create_game(%{})
     end
 
-    test "update_game/2 with valid data updates the game" do
-      game = game_fixture()
-      assert {:ok, %Game{} = game} = Games.update_game(game, @update_attrs)
-      assert game.completed == false
-      assert game.game_id == "some updated game_id"
-      assert game.on_hold == []
-      assert game.p1_card == 43
-      assert game.p1_cards == []
-      assert game.p1_general? == false
-      assert game.p1_name == "some updated p1_name"
-      assert game.p1_points == 43
-      assert game.p1_uuid == "some updated p1_uuid"
-      assert game.p1_winnings == []
-      assert game.p2_card == 43
-      assert game.p2_cards == []
-      assert game.p2_general? == false
-      assert game.p2_name == "some updated p2_name"
-      assert game.p2_points == 43
-      assert game.p2_uuid == "some updated p2_uuid"
-      assert game.p2_winnings == []
+    test "update_game/1 placeholder test" do
+      p1 = fixture(:p1)
+      p2 = fixture(:p2)
+
+      game = game_fixture(p1, p2, %{})
+      update_params = %{"id" => game.game_id, "user" => p1.uuid, "card" => 1}
+      assert %{errors: %{"good job" => ["not implemented yet"]}} = Games.update_game(update_params)
     end
 
-    test "update_game/2 with invalid data returns error changeset" do
-      game = game_fixture()
-      assert {:error, %Ecto.Changeset{}} = Games.update_game(game, @invalid_attrs)
-      assert game == Games.get_game!(game.id)
+    test "update_game/2 with invalid input returns error" do
+      assert %{errors: %{"card" => ["required field"]}} = Games.update_game(%{"id" => "game uuid", "user" => "user uuid"})
+      assert %{errors: %{"user" => ["required field"]}} = Games.update_game(%{"id" => "game uuid", "card" => 1})
+      assert %{errors: %{"id" => ["required field"]}} = Games.update_game(%{"user" => "user uuid", "card" => 1})
+      assert %{errors: %{"id" => ["required field"], "card" => ["required field"]}} = Games.update_game(%{"user" => "user id"})
+      assert %{errors: %{"id" => ["required field"],"user" => ["required field"], "card" => ["required field"]}} = Games.update_game(%{})
     end
 
-    test "delete_game/1 deletes the game" do
-      game = game_fixture()
-      assert {:ok, %Game{}} = Games.delete_game(game)
-      assert_raise Ecto.NoResultsError, fn -> Games.get_game!(game.id) end
+    test "get_game/1 returns the game when there is valid input" do
+      p1 = fixture(:p1)
+      p2 = fixture(:p2)
+      game = game_fixture(p1, p2, %{})
+
+      assert Games.get_game(%{"id" => game.game_id}) == {:ok, game}
     end
 
-    test "change_game/1 returns a game changeset" do
-      game = game_fixture()
-      assert %Ecto.Changeset{} = Games.change_game(game)
+    test "get_game/1 returns error with invalid input" do
+      assert %{errors: %{"id" => ["required field"]}} = Games.get_game(%{})
+      assert %{errors: %{"id" => ["invalid game id"]}} = Games.get_game(%{"id" => "invalid game uuid"})
     end
   end
 end

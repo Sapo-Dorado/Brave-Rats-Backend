@@ -1,4 +1,4 @@
-defmodule Brave.Users.UsersTest do
+defmodule Brave.UsersTest do
   use Brave.DataCase
 
   alias Brave.Users
@@ -48,6 +48,17 @@ defmodule Brave.Users.UsersTest do
       assert %{errors: %{"password" => ["required field"]}} = Users.create_user(%{"username" => @valid_attrs.username})
       assert %{errors: %{"username" => ["required field"]}} = Users.create_user(%{"password" => @valid_attrs.password})
       assert %{errors: %{"username" => ["required field"], "password" => ["required field"]}} = Users.create_user(%{})
+    end
+
+    test "get_user_by_uuid/1 and get_user_by_username/1 return the desired user when input is valid" do
+      user = user_fixture()
+      assert Users.get_user_by_uuid(user.uuid) == {:ok, user}
+      assert Users.get_user_by_username(user.username) == {:ok, user}
+    end
+
+    test "get_user_by_uuid/1 and get_user_by_username/1 return errors when input is invalid" do
+      assert %{errors: %{"uuid" => ["invalid uuid"]}} = Users.get_user_by_uuid("invalid uuid")
+      assert %{errors: %{"username" => ["invalid username"]}} = Users.get_user_by_username("invalid username")
     end
 
   end

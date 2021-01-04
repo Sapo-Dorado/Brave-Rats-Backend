@@ -36,7 +36,7 @@ defmodule Brave.Games do
         where: g.game_id == ^game_id
     case Repo.one(query) do
       nil ->
-        %{errors: %{"game_id" => ["invalid game id"]}}
+        %{errors: %{"id" => ["invalid game id"]}}
       game ->
         {:ok, game}
     end
@@ -58,7 +58,7 @@ defmodule Brave.Games do
     query =
       from g in Game,
         where: ((g.p1_uuid == ^user_id and g.p2_name == ^opponent_name) or
-          (g.p2_uuid == ^user_id and g.p2_name == ^opponent_name)) and (g.completed? == ^completed?)
+          (g.p2_uuid == ^user_id and g.p1_name == ^opponent_name)) and (g.completed? == ^completed?)
     {:ok, Repo.all(query)}
   end
 
