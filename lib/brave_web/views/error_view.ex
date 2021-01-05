@@ -1,11 +1,6 @@
 defmodule BraveWeb.ErrorView do
   use BraveWeb, :view
 
-  # If you want to customize a particular status code
-  # for a certain format, you may uncomment below.
-  # def render("500.json", _assigns) do
-  #   %{errors: %{detail: "Internal Server Error"}}
-  # end
   def render("error.json", %{errors: errors}) do
     %{errors: errors}
   end

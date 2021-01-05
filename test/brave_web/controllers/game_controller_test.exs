@@ -169,12 +169,16 @@ defmodule BraveWeb.GameControllerTest do
       assert %{"p1_card" => 1} = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when input is invalid", %{conn: conn, game: %Game{game_id: id}} do
+    test "renders errors when input is invalid", %{conn: conn, game: %Game{game_id: id, p1_uuid: uuid}} do
       conn = patch(conn, Routes.game_path(conn, :update))
       assert json_response(conn, 400)["errors"] != %{}
 
       conn = patch(conn, Routes.game_path(conn, :update, id: id, user: "invalid uuid", card: 1))
       assert json_response(conn, 401)["errors"] != %{}
+
+      assert_error_sent 500, fn ->
+        patch(conn, Routes.game_path(conn, :update, id: id, user: uuid, card: "not an integer"))
+      end
     end
   end
 
