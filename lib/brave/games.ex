@@ -60,7 +60,7 @@ defmodule Brave.Games do
             card in game.p1_cards ->
                 {:ok, game} =
                   game
-                  |> Game.changeset(%{p1_card: card, p1_cards: List.delete(game.p1_cards, card)})
+                  |> Game.changeset(%{p1_card: card})
                   |> Repo.update()
                 process_turn(game)
             true -> %{errors: %{"card" => ["invalid card:" <> card_string]}}
@@ -71,7 +71,7 @@ defmodule Brave.Games do
             card in game.p2_cards ->
               {:ok, game} =
                 game
-                |> Game.changeset(%{p2_card: card, p2_cards: List.delete(game.p2_cards, card)})
+                |> Game.changeset(%{p2_card: card})
                 |> Repo.update()
               process_turn(game)
             true -> %{errors: %{"card" => ["invalid card:" <> to_string(card)]}}
@@ -109,7 +109,7 @@ defmodule Brave.Games do
       {:ok, game}
     else
       params =
-        %{p1_card: nil, p2_card: nil}
+        %{p1_card: nil, p2_card: nil, p1_cards: List.delete(game.p1_cards, game.p1_card), p2_cards: List.delete(game.p2_cards, game.p2_card)}
         |> process_combat(game)
         |> Enum.into(get_state_vars(game))
       game
@@ -125,7 +125,7 @@ defmodule Brave.Games do
       p1_general?: game.p1_card == 6 and game.p2_card != 5 and game.p2_card != 0,
       p2_general?: game.p2_card == 6 and game.p1_card != 5 and game.p1_card != 0
     }
-    if game.p1_cards == [], do: vars |> Map.put(:completed?, true), else: vars
+    if length(game.p1_cards) == 1, do: vars |> Map.put(:completed?, true), else: vars
   end
 
   defp process_combat(params, game) do
