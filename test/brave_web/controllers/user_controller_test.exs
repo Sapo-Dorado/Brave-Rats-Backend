@@ -29,18 +29,16 @@ defmodule BraveWeb.UserControllerTest do
       assert %{"uuid" => uuid} = json_response(conn, 200)["data"]
     end
 
-    test "returns 401 error when password is incorrect", %{conn: conn} do
-      conn = get(conn, Routes.user_path(conn, :show,
-          username: @create_attrs.username,
-          password: "invalid password"))
-      assert json_response(conn, 401)["errors"] != %{}
-    end
-
-    test "returns 400 error when data is invalid", %{conn: conn} do
+    test "returns error when data is invalid", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :show,
           username: "invalid username",
           password: @create_attrs.password))
       assert json_response(conn, 400)["errors"] != %{}
+
+      conn = get(conn, Routes.user_path(conn, :show,
+          username: @create_attrs.username,
+          password: "invalid password"))
+      assert json_response(conn, 401)["errors"] != %{}
     end
   end
 

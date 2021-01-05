@@ -10,6 +10,12 @@ defmodule BraveWeb.Router do
 
     get "/user", UserController, :show
     post "/user", UserController, :create
+
+    get "/games", GameController, :index
+    get "/completed", GameController, :index_completed
+    get "/game", GameController, :show
+    post "/games", GameController, :create
+    patch "/action", GameController, :update
   end
 
   # coveralls-ignore-start

@@ -21,7 +21,7 @@ defmodule Brave.Users do
   end
 
   def get_uuid(params) do
-    user_errors(params)
+    Brave.find_missing_params(params, ["username", "password"])
   end
 
   def create_user(%{"username" => username, "password" => password}) do
@@ -31,17 +31,30 @@ defmodule Brave.Users do
   end
 
   def create_user(params) do
-    user_errors(params)
+    Brave.find_missing_params(params, ["username", "password"])
   end
 
-  defp user_errors(params) do
-    errors = Enum.reduce(["username", "password"], %{}, fn(field, acc) ->
-      if(params[field] == nil) do
-        Map.put(acc, field, ["required field"])
-      else
-        acc
-      end
-    end)
-    %{errors: errors}
+  def get_user_by_uuid(uuid) do
+    query =
+      from u in User,
+        where: u.uuid == ^uuid
+    case Repo.one(query) do
+      nil ->
+        %{errors: %{"uuid" => ["invalid uuid"]}}
+      user ->
+        {:ok, user}
+    end
+  end
+
+  def get_user_by_username(username) do
+    query =
+      from u in User,
+        where: u.username == ^username
+    case Repo.one(query) do
+      nil ->
+        %{errors: %{"username" => ["invalid username"]}}
+      user ->
+        {:ok, user}
+    end
   end
 end
