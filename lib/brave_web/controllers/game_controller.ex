@@ -11,13 +11,13 @@ defmodule BraveWeb.GameController do
 
   def index(conn, params) do
     with {:ok, games} <- Games.list_games(params) do
-      render(conn, "index.json", games: games)
+      render(conn, "index.json", games: games, uuid: params["user"])
     end
   end
 
   def index_completed(conn, params) do
     with {:ok, games} <- Games.list_completed_games(params) do
-      render(conn, "index.json", games: games)
+      render(conn, "index.json", games: games, uuid: params["user"])
     end
   end
 
@@ -29,7 +29,7 @@ defmodule BraveWeb.GameController do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.game_path(conn, :show, id: game.game_id))
-      |> render("show.json", game: game)
+      |> render("show.json", game: game, uuid: user_id)
     end
   end
 
@@ -39,13 +39,13 @@ defmodule BraveWeb.GameController do
 
   def show(conn, params) do
     with {:ok, %Game{} = game} <- Games.get_game(params) do
-      render(conn, "show.json", game: game)
+      render(conn, "show.json", game: game, uuid: params["user"])
     end
   end
 
   def update(conn, params) do
     with {:ok, %Game{} = game} <- Games.update_game(params) do
-      render(conn, "show.json", game: game)
+      render(conn, "show.json", game: game, uuid: params["user"])
     end
   end
 end

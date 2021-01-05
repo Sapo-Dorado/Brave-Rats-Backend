@@ -66,14 +66,10 @@ defmodule BraveWeb.GameControllerTest do
 
       conn = get(conn, Routes.game_path(conn, :show, id: game_id))
 
-      uuid1 = p1.uuid
-      uuid2 = p2.uuid
       name1 = p1.username
       name2 = p2.username
 
       assert %{
-        "p1_uuid" => ^uuid1,
-        "p2_uuid" => ^uuid2,
         "p1_name" => ^name1,
         "p2_name" => ^name2,
         "completed?" => false
@@ -95,17 +91,67 @@ defmodule BraveWeb.GameControllerTest do
     test "renders game when input is valid", %{conn: conn, game: game} do
       conn = get(conn, Routes.game_path(conn, :show, id: game.game_id))
       id = game.game_id
-      uuid1 = game.p1_uuid
-      uuid2 = game.p2_uuid
       name1 = game.p1_name
       name2 = game.p2_name
       assert %{
         "game_id" => ^id,
-        "p1_uuid" => ^uuid1,
-        "p2_uuid" => ^uuid2,
         "p1_name" => ^name1,
-        "p2_name" => ^name2
+        "p2_name" => ^name2,
+        "p1_card" => false,
+        "p2_card" => false,
       } = json_response(conn, 200)["data"]
+    end
+
+    test "renders game with cards visible for user that is optionally provided as a param", %{conn: conn, game: game} do
+      conn = get(conn, Routes.game_path(conn, :show, id: game.game_id, user: game.p1_uuid))
+      id = game.game_id
+      name1 = game.p1_name
+      name2 = game.p2_name
+      assert %{
+        "game_id" => ^id,
+        "p1_name" => ^name1,
+        "p2_name" => ^name2,
+        "p1_card" => nil,
+        "p2_card" => false,
+      } = json_response(conn, 200)["data"]
+
+      Games.update_game(%{"id" => game.game_id, "user" => game.p2_uuid, "card" => "1"})
+      conn = get(conn, Routes.game_path(conn, :show, id: game.game_id, user: game.p2_uuid))
+      assert %{
+        "game_id" => ^id,
+        "p1_name" => ^name1,
+        "p2_name" => ^name2,
+        "p1_card" => false,
+        "p2_card" => 1,
+      } = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.game_path(conn, :show, id: game.game_id, user: game.p1_uuid))
+      assert %{
+        "game_id" => ^id,
+        "p1_name" => ^name1,
+        "p2_name" => ^name2,
+        "p1_card" => nil,
+        "p2_card" => true,
+      } = json_response(conn, 200)["data"]
+    end
+
+    test "reveals player cards if spy is active", %{conn: conn, game: game} do
+      Games.update_game(%{"id" => game.game_id, "user" => game.p1_uuid, "card" => "2"})
+      Games.update_game(%{"id" => game.game_id, "user" => game.p2_uuid, "card" => "1"})
+      Games.update_game(%{"id" => game.game_id, "user" => game.p2_uuid, "card" => "3"})
+
+      conn = get(conn, Routes.game_path(conn, :show, id: game.game_id))
+      id = game.game_id
+      name1 = game.p1_name
+      name2 = game.p2_name
+      assert %{
+        "game_id" => ^id,
+        "p1_name" => ^name1,
+        "p2_name" => ^name2,
+        "p1_card" => false,
+        "p2_card" => 3,
+      } = json_response(conn, 200)["data"]
+
     end
 
     test "returns error when input is invalid", %{conn: conn} do
@@ -118,7 +164,7 @@ defmodule BraveWeb.GameControllerTest do
   describe "update game" do
     setup [:create_game]
 
-    test "updating game returns updated game when input is valid", %{conn: conn, game: %Game{game_id: id, p1_uuid: user, p2_name: opponent} = _game} do
+    test "renders updated game when input is valid", %{conn: conn, game: %Game{game_id: id, p1_uuid: user, p2_name: opponent} = _game} do
       conn = patch(conn, Routes.game_path(conn, :update, id: id, user: user, opponent: opponent, card: 1))
       assert %{"p1_card" => 1, "p1_cards" => [0,2,3,4,5,6,7]} = json_response(conn, 200)["data"]
     end
