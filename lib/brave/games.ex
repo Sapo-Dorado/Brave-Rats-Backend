@@ -5,8 +5,6 @@ defmodule Brave.Games do
 
   alias Brave.Games.Game
 
-  @player1 0
-  @player2 1
 
   @default_hand [0,1,2,3,4,5,6,7]
 
@@ -138,22 +136,22 @@ defmodule Brave.Games do
       c1 == 7 ->
         if(c2 == 1) do
           params
-          |> process_round_win(game, @player2)
+          |> process_round_win(game, :player2)
           |> Map.put(:completed?, true)
           |> Map.put(:p2_points, 10)
           |> Map.put(:p1_points, 0)
         else
-          params |> process_round_win(game, @player1)
+          params |> process_round_win(game, :player1)
         end
       c2 == 7 ->
         if(c1 == 1) do
           params
-          |> process_round_win(game, @player1)
+          |> process_round_win(game, :player1)
           |> Map.put(:completed?, true)
           |> Map.put(:p1_points, 10)
           |> Map.put(:p2_points, 0)
         else
-          params |> process_round_win(game, @player2)
+          params |> process_round_win(game, :player2)
         end
       true -> params |> process_power_winner(game)
     end
@@ -166,7 +164,7 @@ defmodule Brave.Games do
   defp process_round_win(params, game, player) do
     winnings = [[game.p1_card, game.p2_card] | game.on_hold]
     {points_field, points, winnings_field, winnings} =
-      if player == @player1 do
+      if player == :player1 do
         {:p1_points, game.p1_points + 1, :p1_winnings, winnings ++ game.p1_winnings}
       else
         {:p2_points, game.p2_points + 1, :p2_winnings, winnings ++ game.p2_winnings}
@@ -174,7 +172,7 @@ defmodule Brave.Games do
     winning_cards =
       for cards <- game.on_hold do
         [p1 | [p2 | []]] = cards
-        if player == @player1, do: p1, else: p2
+        if player == :player1, do: p1, else: p2
       end
     params =
       params
@@ -198,9 +196,9 @@ defmodule Brave.Games do
     else
       winner =
         if(assassin_effect?(game)) do
-          if p1_power < p2_power, do: @player1, else: @player2
+          if p1_power < p2_power, do: :player1, else: :player2
         else
-          if p1_power > p2_power, do: @player1, else: @player2
+          if p1_power > p2_power, do: :player1, else: :player2
         end
       params |> process_round_win(game, winner)
     end
