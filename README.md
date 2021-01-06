@@ -7,13 +7,13 @@
 
 Route | Request Type | Params | Description | Example Result
 ------|--------------|--------|-------------|-------------
-/api/user | POST | username password | Creates a new user and returns its uuid | `{"uuid": "p8gh323c-23t2-4po8-9fb1-l6p12e9a125h"}`
-/api/user | GET | username password | Returns the uuid of the desired user | `{"uuid": "p8gh323c-23t2-4po8-9fb1-l6p12e9a125h"}`
-/api/games | GET | user(a players uuid) opponent(optional opponent username to filter results) | Returns a list of games that fit the parameters | `[a list of games]`
-/api/completed | GET |  user(a players uuid) opponent(optional opponent username to filter results) | Returns a list of completed games that fit the parameters |`[a list of completed games]`
-/api/game | GET | id(the game's id) user(optional player uuid) | Returns the game that corresponds the the game id. Hides card values except for ones played by the specified user | `{a game object}`
-/api/games | POST | user(a players uuid) opponent(opponents username) | Creates a new game with the user and opponent and returns the game | `{a game object}`
-/api/action | PATCH | id(the game's id) user(the user's uuid) card(the card being played by the user) | updates the game with the played card and returns the game | `{a game object}`
+/api/user | POST | **username** **password** | Creates a new user and returns its uuid | `{"uuid": "p8gh323c-23t2-4po8-9fb1-l6p12e9a125h"}`
+/api/user | GET | **username** **password** | Returns the uuid of the desired user | `{"uuid": "p8gh323c-23t2-4po8-9fb1-l6p12e9a125h"}`
+/api/games | GET | **user**(a players uuid) **opponent**(optional opponent username to filter results) | Returns a list of games that fit the parameters | `[a list of games]`
+/api/completed | GET |  **user**(a players uuid) **opponent**(optional opponent username to filter results) | Returns a list of completed games that fit the parameters |`[a list of completed games]`
+/api/game | GET | **id**(the game's id) **user**(optional player uuid) | Returns the game that corresponds the the game id. Hides card values except for ones played by the specified user | `{a game object}`
+/api/games | POST | **user**(a players uuid) **opponent**(opponents username) | Creates a new game with the user and opponent and returns the game | `{a game object}`
+/api/action | PATCH | **id**(the game's id) **user**(the user's uuid) **card**(the card being played by the user) | updates the game with the played card and returns the game | `{a game object}`
 
 ## The Game Object
 
